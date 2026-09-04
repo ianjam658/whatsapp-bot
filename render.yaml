@@ -1,0 +1,29 @@
+services:
+  # Single service running both the WhatsApp bot and the payment webhook
+  # listener (see src/start.js), sharing one disk so subscription upgrades
+  # from the webhook are immediately visible to the bot process.
+  # Type "web" because Render's web services require listening on $PORT,
+  # which the webhook server does.
+  - type: web
+    name: whatsapp-bot
+    env: node
+    plan: starter # cheapest paid plan that supports persistent disks
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SESSION_NAME
+        value: default-session
+      - key: PHONE_NUMBER
+        sync: false # set to your number (e.g. 254712345678) to use pairing-code login
+      - key: DATA_DIR
+        value: /var/data
+      - key: PAYSTACK_SECRET_KEY
+        sync: false # set manually in Render dashboard, not in git
+      - key: FLUTTERWAVE_SECRET_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    disk:
+      name: whatsapp-bot-data
+      mountPath: /var/data
+      sizeGB: 1
